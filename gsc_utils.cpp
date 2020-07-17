@@ -26,6 +26,36 @@ void gsc_utils_gettimes()
 	Scr_AddArray();
 }
 
+void gsc_utils_out_printf()
+{
+	char * address;
+	char * msg;
+	
+	if (!stackGetParams("ss", &address, &msg))
+	{
+		stackError("gsc_utils_out_printf() one or more arguments is undefined or has a wrong type");
+		stackPushUndefined();
+		return;
+	}
+
+	netadr_t from;
+	NET_StringToAdr(address, &from);
+	NET_OutOfBandPrint(NS_SERVER, from, msg);
+}
+
+void gsc_utils_geprintf()
+{
+	char * string;
+	if (!stackGetParams("s", &string))
+	{
+		stackError("gsc_utils_geprintf() one or more arguments is undefined or has a wrong type");
+		stackPushUndefined();
+		return;
+	}
+	
+	Com_Printf(string);
+}
+
 void gsc_utils_dorconcmd()
 {	
 	char * sFrom;
@@ -34,6 +64,7 @@ void gsc_utils_dorconcmd()
 	if (!stackGetParams("si", &sFrom, &pointerMsg))
 	{
 		stackError("gsc_utils_dorconcmd() one or more arguments is undefined or has a wrong type");
+		stackPushUndefined();
 		return;
 	}
 	

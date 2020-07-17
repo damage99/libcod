@@ -1274,7 +1274,7 @@ public:
 
 		hook_gametype_scripts = new cHook(0x0810DDEE, (int)hook_codscript_gametype_scripts);
 		hook_gametype_scripts->hook();
-		
+
 		hook_init_opcode = new cHook(0x08076B9C, (int)custom_Scr_InitOpcodeLookup);
 		hook_init_opcode->hook();
 		hook_add_opcode = new cHook(0x08076D92, (int)custom_AddOpcodePos);

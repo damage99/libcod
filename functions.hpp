@@ -3,6 +3,15 @@
 
 /* MAKE FUNCTIONS STATIC, SO THEY CAN BE IN EVERY FILE */
 
+typedef int (*Com_PrintMessage_t)(int a1, char *s);
+#if COD_VERSION == COD2_1_0
+static const Com_PrintMessage_t Com_PrintMessage = (Com_PrintMessage_t)0x080609A8;
+#elif COD_VERSION == COD2_1_2
+static const Com_PrintMessage_t Com_PrintMessage = (Com_PrintMessage_t)0x08060C28;
+#elif COD_VERSION == COD2_1_3
+static const Com_PrintMessage_t Com_PrintMessage = (Com_PrintMessage_t)0x08060C20;
+#endif
+
 typedef unsigned int (*GetVariableName_t)(unsigned int a1);
 #if COD_VERSION == COD2_1_0
 static const GetVariableName_t GetVariableName = (GetVariableName_t)0x0807CA72;
