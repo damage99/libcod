@@ -38,6 +38,9 @@ cHook *hook_add_opcode;
 cHook *hook_print_codepos;
 cHook *hook_touch_item;
 
+cHook *hook_outband;
+
+int codecallback_svc_info = 0;
 int codecallback_remotecommand = 0;
 int codecallback_playercommand = 0;
 int codecallback_userinfochanged = 0;
@@ -118,6 +121,7 @@ int hook_codscript_gametype_scripts()
 	
 	hook_gametype_scripts->unhook();
 			
+	codecallback_svc_info = Scr_GetFunctionHandle(path_for_cb, "CodeCallback_SVC_Info", 0);
 	codecallback_remotecommand = Scr_GetFunctionHandle(path_for_cb, "CodeCallback_remoteCommand", 0);
 	codecallback_playercommand = Scr_GetFunctionHandle(path_for_cb, "CodeCallback_PlayerCommand", 0);
 	codecallback_userinfochanged = Scr_GetFunctionHandle(path_for_cb, "CodeCallback_UserInfoChanged", 0);
@@ -1230,6 +1234,38 @@ void custom_Scr_PrintPrevCodePos(int a1, char *a2, int a3)
 	hook_print_codepos->hook();
 }
 
+void out_band(netsrc_t net_socket, netadr_t adr, const char *format, ...)
+{
+	char s[COD2_MAX_STRINGLENGTH];
+	va_list va;
+
+	va_start(va, format);
+	vsnprintf(s, sizeof(s), format, va);
+	va_end(va);
+	
+	char infoResponse[13];
+	strncpy(infoResponse, s, (sizeof(infoResponse) - 1));
+	infoResponse[12] = '\0';
+	if (strcmp(infoResponse, "infoResponse") == 0)
+	{
+		if( codecallback_svc_info && Scr_IsSystemActive())
+		{
+			stackPushString(NET_AdrToString(adr));
+			stackPushString(s);
+			short ret = Scr_ExecThread(codecallback_svc_info, 2);
+			Scr_FreeThread(ret);
+			
+			return;
+		}
+	}
+	else if (strcmp(infoResponse, "#nfoResponse") == 0)
+		s[0] = 'i';
+	
+	hook_outband->unhook();
+	NET_OutOfBandPrint(net_socket, adr, s);
+	hook_outband->hook();
+}
+
 class cCallOfDuty2Pro
 {
 public:
@@ -1290,6 +1326,8 @@ public:
 		hook_fire_grenade->hook();
 		hook_touch_item = new cHook(0x081037F0, int(touch_item));
 		hook_touch_item->hook();
+		hook_outband = new cHook(0x0806C40C, int(out_band));
+		hook_outband->hook();
 
 #if COMPILE_PLAYER == 1
 		hook_play_movement = new cHook(0x0808F488, (int)play_movement);
@@ -1355,6 +1393,8 @@ public:
 		hook_fire_grenade->hook();
 		hook_touch_item = new cHook(0x08105B24, int(touch_item));
 		hook_touch_item->hook();
+		hook_outband = new cHook(0x0806C8D4, int(out_band));
+		hook_outband->hook();
 
 #if COMPILE_PLAYER == 1
 		hook_play_movement = new cHook(0x08090D18, (int)play_movement);
@@ -1420,6 +1460,8 @@ public:
 		hook_fire_grenade->hook();
 		hook_touch_item = new cHook(0x08105C80, int(touch_item));
 		hook_touch_item->hook();
+		hook_outband = new cHook(0x0806C8CC, int(out_band));
+		hook_outband->hook();
 
 #if COMPILE_PLAYER == 1
 		hook_play_movement = new cHook(0x08090DAC, (int)play_movement);
