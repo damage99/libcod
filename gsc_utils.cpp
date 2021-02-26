@@ -208,7 +208,7 @@ int stackPrintParam(int param)
 	case STACK_STRING:
 		char *str;
 		stackGetParamString(param, &str); // no error checking, since we know it's a string
-		if (con_coloredPrints->boolean)
+		if (con_coloredPrints->boolean && strchr(str, Q_COLOR_ESCAPE) != NULL)
 			Sys_AnsiColorPrint(str);
 		else
 			printf("%s", str);
